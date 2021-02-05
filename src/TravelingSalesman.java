@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -6,16 +7,19 @@ import java.util.stream.Stream;
 public class TravelingSalesman {
     private final double[][] cities;
     private final double[][] distances;
-    private int[] solution;
+    private int[] solution, randomTour;
+    private double optimalCost, randomCost;
     private boolean solved;
-    private double cost;
+    private int seed;
+
 
     public TravelingSalesman(int seed){
         this.solution = new int[6];
         this.cities = new double[7][2];
         this.distances = new double[7][7];
         this.solved = false;
-        this.cost = Double.MAX_VALUE;
+        this.optimalCost = Double.MAX_VALUE;
+        this.seed = seed;
 
         // Set points
         Random r = new Random(seed);
@@ -63,8 +67,12 @@ public class TravelingSalesman {
         return distances[city1][city2];
     }
 
-    public double getCost() {
-        return cost;
+    public double getOptimalCost() {
+        return optimalCost;
+    }
+
+    public double getRandomCost() {
+        return randomCost;
     }
 
     public void findSolutionByForce(){
@@ -75,8 +83,8 @@ public class TravelingSalesman {
     public void bruteForceRecursive(int n, int[] path) {
         if(n == 1) {
             double costOfPath = findCost(path);
-            if (costOfPath < this.cost){
-                this.cost = costOfPath;
+            if (costOfPath < this.optimalCost){
+                this.optimalCost = costOfPath;
                 this.solution = Arrays.copyOf(path, 6);
             }
         } else {
@@ -103,7 +111,22 @@ public class TravelingSalesman {
         return sum;
     }
 
+    public void generateRandomTour(){
+        this.randomTour = new int[7];
+        ArrayList<Integer> tour = new ArrayList<>();
 
+        for (int i = 1; i < 7; i++) {
+            tour.add(i);
+        }
+
+        java.util.Collections.shuffle(tour, new Random(seed));
+        tour.add(0, 0);
+
+        for(int i = 0; i < tour.size(); i++)
+            randomTour[i] = tour.get(i);
+
+        randomCost = findCost(randomTour);
+    }
 
     public static void main(String[] args) {
         TravelingSalesman ts = new TravelingSalesman();
