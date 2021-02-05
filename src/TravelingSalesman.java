@@ -1,5 +1,7 @@
 import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.Stream;
+
 
 public class TravelingSalesman {
     private final double[][] cities;
@@ -8,7 +10,7 @@ public class TravelingSalesman {
     private boolean solved;
     private double cost;
 
-    public TravelingSalesman(){
+    public TravelingSalesman(int seed){
         this.solution = new int[6];
         this.cities = new double[7][2];
         this.distances = new double[7][7];
@@ -16,7 +18,11 @@ public class TravelingSalesman {
         this.cost = Double.MAX_VALUE;
 
         // Set points
-        Random r = new Random();
+        Random r = new Random(seed);
+        double[][] tab = Stream.generate(() -> r.doubles(7).toArray())
+                .limit(7)
+                .toArray(double[][]::new);
+
         for (int i=0; i < 7; i++){
             this.cities[i][0] = r.nextDouble();
             this.cities[i][1] = r.nextDouble();
@@ -29,6 +35,10 @@ public class TravelingSalesman {
                         + Math.pow(cities[i][1] - cities[j][1], 2) );
             }
         }
+    }
+
+    public TravelingSalesman(){
+        this(1000);
     }
 
     public double[][] getCities() {
@@ -53,6 +63,9 @@ public class TravelingSalesman {
         return distances[city1][city2];
     }
 
+    public double getCost() {
+        return cost;
+    }
 
     public void findSolutionByForce(){
         bruteForceRecursive(6, new int[]{1,2,3,4,5,6});
@@ -70,9 +83,9 @@ public class TravelingSalesman {
             for(int i = 0; i < n-1; i++) {
                 bruteForceRecursive(n - 1, path);
                 if(n % 2 == 0) {
-                    swap(path, i, n-1);
+                    Utils.swap(path, i, n-1);
                 } else {
-                    swap(path, 0, n-1);
+                    Utils.swap(path, 0, n-1);
                 }
             }
             bruteForceRecursive(n - 1, path);
@@ -90,38 +103,16 @@ public class TravelingSalesman {
         return sum;
     }
 
-    private static  void swap(int[] input, int a, int b) {
-        int tmp = input[a];
-        input[a] = input[b];
-        input[b] = tmp;
-    }
 
-    private static void printArray(int[] input) {
-        System.out.print('\n');
-        for(int i = 0; i < input.length; i++) {
-            System.out.print(input[i] + ", ");
-        }
-    }
-
-    private static void printArray(double[] input) {
-        System.out.print('\n');
-        for(int i = 0; i < input.length; i++) {
-            System.out.print(input[i] + ", ");
-        }
-    }
-
-    private static void print2DArray(double[][] input) {
-        System.out.print('\n');
-        for(int i = 0; i < input.length; i++) {
-            printArray(input[i]);
-        }
-    }
 
     public static void main(String[] args) {
         TravelingSalesman ts = new TravelingSalesman();
 
+        Utils.print2DArray(ts.getCities());
+        Utils.print2DArray(ts.getDistances());
+
         ts.findSolutionByForce();
-        ts.getSolution();
+        Utils.printArray(ts.getSolution());
     }
 
 
