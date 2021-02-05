@@ -1,5 +1,13 @@
 public class Utils {
-    public static  void swap(int[] input, int a, int b) {
+
+    public static int nChoose2(int n){
+        if (n < 2)
+            return 0;
+        else
+            return n * (n - 1) / 2;
+    }
+
+    public static void swap(int[] input, int a, int b) {
         int tmp = input[a];
         input[a] = input[b];
         input[b] = tmp;

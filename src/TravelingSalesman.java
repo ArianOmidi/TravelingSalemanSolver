@@ -5,36 +5,37 @@ import java.util.stream.Stream;
 
 
 public class TravelingSalesman {
-    private final double[][] cities;
-    private final double[][] distances;
+    private final int numOfCities, seed;
+    private final double[][] cities, distances;
+
     private int[] optimalTour, randomTour, greedyTour;
     private double optimalCost, randomCost, greedyCost;
     private boolean solved;
-    private int seed;
 
+    public TravelingSalesman(int numOfCities, int seed){
+        this.numOfCities = numOfCities;
+        this.seed = seed;
 
-    public TravelingSalesman(int seed){
-        this.optimalTour = new int[7];
-        this.cities = new double[7][2];
-        this.distances = new double[7][7];
+        this.cities = new double[numOfCities][2];
+        this.distances = new double[numOfCities][numOfCities];
         this.solved = false;
         this.optimalCost = Double.MAX_VALUE;
-        this.seed = seed;
+
 
         // Set points
         Random r = new Random(seed);
-        double[][] tab = Stream.generate(() -> r.doubles(7).toArray())
-                .limit(7)
+        double[][] tab = Stream.generate(() -> r.doubles(numOfCities).toArray())
+                .limit(numOfCities)
                 .toArray(double[][]::new);
 
-        for (int i=0; i < 7; i++){
+        for (int i=0; i < numOfCities; i++){
             this.cities[i][0] = r.nextDouble();
             this.cities[i][1] = r.nextDouble();
         }
 
         // Set distances
-        for (int i=0; i < 7; i++){
-            for(int j=0; j < 7; j++){
+        for (int i=0; i < numOfCities; i++){
+            for(int j=0; j < numOfCities; j++){
                 this.distances[i][j] = Math.sqrt( Math.pow(cities[i][0] - cities[j][0], 2)
                         + Math.pow(cities[i][1] - cities[j][1], 2) );
             }
@@ -42,7 +43,7 @@ public class TravelingSalesman {
     }
 
     public TravelingSalesman(){
-        this(1000);
+        this(7, 260835976);
     }
 
     public double[][] getCities() {
@@ -53,16 +54,12 @@ public class TravelingSalesman {
         return distances;
     }
 
-    public int[] getSolution() {
+    public int[] getOptimalSolution() {
         return optimalTour;
     }
 
     public boolean isSolved() {
         return solved;
-    }
-
-    public double getDistanceBetween(int city1, int city2){
-        return distances[city1][city2];
     }
 
     public double getOptimalCost() {
@@ -78,7 +75,13 @@ public class TravelingSalesman {
     }
 
     public void findSolutionByForce(){
-        bruteForceRecursive(7, new int[]{0,1,2,3,4,5,6});
+        int[] initTour = new int[numOfCities];
+
+        for (int i = 0; i < numOfCities; i++) {
+            initTour[i] = i;
+        }
+
+        bruteForceRecursive(numOfCities, initTour);
         solved = true;
     }
 
@@ -87,7 +90,7 @@ public class TravelingSalesman {
             double costOfPath = findCost(path);
             if (costOfPath < this.optimalCost){
                 this.optimalCost = costOfPath;
-                this.optimalTour = Arrays.copyOf(path, 7);
+                this.optimalTour = Arrays.copyOf(path, path.length);
             }
         } else {
             for(int i = 0; i < n-1; i++) {
@@ -108,19 +111,18 @@ public class TravelingSalesman {
         for (int i=0; i < path.length - 1; i++){
             sum += distances[path[i]][path[(i+1)]];
         }
-        sum +=  distances[path[path.length - 1]][path[0]];
+
+        sum += distances[path[path.length - 1]][path[0]];
 
         return sum;
     }
 
     public void generateRandomTour(){
-        this.randomTour = new int[7];
         ArrayList<Integer> tour = new ArrayList<>();
+        this.randomTour = new int[numOfCities];
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < numOfCities; i++)
             tour.add(i);
-        }
-
         java.util.Collections.shuffle(tour, new Random(seed));
 
         for(int i = 0; i < tour.size(); i++)
@@ -159,11 +161,11 @@ public class TravelingSalesman {
     }
 
     private int[][] getNeighbors(int[] tour){
-        int[][] neighbors = new int[21][tour.length];
+        int[][] neighbors = new int[Utils.nChoose2(numOfCities)][tour.length];
         int index = 0;
 
-        for (int i = 0; i < 6; i++) {
-            for (int j = i + 1; j < 7; j++) {
+        for (int i = 0; i < numOfCities - 1; i++) {
+            for (int j = i + 1; j < numOfCities; j++) {
                 int[] neighbor = Arrays.copyOf(tour,tour.length);
                 Utils.swap(neighbor, i, j);
                 neighbors[index++] = neighbor;
@@ -172,17 +174,5 @@ public class TravelingSalesman {
 
         return neighbors;
     }
-
-    public static void main(String[] args) {
-        TravelingSalesman ts = new TravelingSalesman();
-
-        Utils.print2DArray(ts.getCities());
-        Utils.print2DArray(ts.getDistances());
-
-        ts.findSolutionByForce();
-        Utils.printArray(ts.getSolution());
-    }
-
-
 
 }
