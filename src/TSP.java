@@ -4,7 +4,7 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 
-public class TravelingSalesman {
+public class TSP {
     private final int numOfCities, seed;
     private final double[][] cities, distances;
 
@@ -12,7 +12,7 @@ public class TravelingSalesman {
     private double optimalCost, randomCost, greedyCost;
     private boolean solved;
 
-    public TravelingSalesman(int numOfCities, int seed){
+    public TSP(int numOfCities, int seed){
         this.numOfCities = numOfCities;
         this.seed = seed;
 
@@ -24,10 +24,6 @@ public class TravelingSalesman {
 
         // Set points
         Random r = new Random(seed);
-        double[][] tab = Stream.generate(() -> r.doubles(numOfCities).toArray())
-                .limit(numOfCities)
-                .toArray(double[][]::new);
-
         for (int i=0; i < numOfCities; i++){
             this.cities[i][0] = r.nextDouble();
             this.cities[i][1] = r.nextDouble();
@@ -42,9 +38,8 @@ public class TravelingSalesman {
         }
     }
 
-    public TravelingSalesman(){
-        this(7, 260835976);
-    }
+
+    /* --- Getters --- */
 
     public double[][] getCities() {
         return cities;
@@ -58,10 +53,6 @@ public class TravelingSalesman {
         return optimalTour;
     }
 
-    public boolean isSolved() {
-        return solved;
-    }
-
     public double getOptimalCost() {
         return optimalCost;
     }
@@ -73,6 +64,13 @@ public class TravelingSalesman {
     public double getGreedyCost() {
         return greedyCost;
     }
+
+    public boolean isSolved() {
+        return solved;
+    }
+
+
+    /* --- Optimal Solution --- */
 
     public void findSolutionByForce(){
         int[] initTour = new int[numOfCities];
@@ -105,17 +103,8 @@ public class TravelingSalesman {
         }
     }
 
-    private double findCost(int[] path){
-        double sum = 0;
 
-        for (int i=0; i < path.length - 1; i++){
-            sum += distances[path[i]][path[(i+1)]];
-        }
-
-        sum += distances[path[path.length - 1]][path[0]];
-
-        return sum;
-    }
+    /* --- Random Tours --- */
 
     public void generateRandomTour(){
         ArrayList<Integer> tour = new ArrayList<>();
@@ -130,6 +119,9 @@ public class TravelingSalesman {
 
         randomCost = findCost(randomTour);
     }
+
+
+    /* --- Greedy Solution --- */
 
     public void findGreedySolution(){
         if (randomTour == null){
@@ -158,6 +150,21 @@ public class TravelingSalesman {
         }
 
         return tour;
+    }
+
+
+    /* --- Helper Methods --- */
+
+    private double findCost(int[] path){
+        double sum = 0;
+
+        for (int i=0; i < path.length - 1; i++){
+            sum += distances[path[i]][path[(i+1)]];
+        }
+
+        sum += distances[path[path.length - 1]][path[0]];
+
+        return sum;
     }
 
     private int[][] getNeighbors(int[] tour){

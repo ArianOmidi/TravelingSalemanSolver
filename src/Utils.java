@@ -15,22 +15,22 @@ public class Utils {
 
     public static void printArray(int[] input) {
         System.out.print('\n');
-        for(int i = 0; i < input.length; i++) {
-            System.out.print(input[i] + ", ");
+        for (int j : input) {
+            System.out.print(j + ", ");
         }
     }
 
     public static void printArray(double[] input) {
         System.out.print('\n');
-        for(int i = 0; i < input.length; i++) {
-            System.out.print(input[i] + ", ");
+        for (double v : input) {
+            System.out.print(v + ", ");
         }
     }
 
     public static void print2DArray(double[][] input) {
         System.out.print('\n');
-        for(int i = 0; i < input.length; i++) {
-            printArray(input[i]);
+        for (double[] doubles : input) {
+            printArray(doubles);
         }
     }
 }
