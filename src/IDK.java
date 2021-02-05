@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class IDK {
     private final List<TravelingSalesman> TSPList;
-    private double[] optimalStatistics, randomStatistics;
+    private double[] optimalStatistics, randomStatistics, greedyStatistics;
     private final int numOfTSP;
 
 
@@ -12,6 +12,7 @@ public class IDK {
         this.numOfTSP = numOfTSP;
         this.optimalStatistics = new double[]{0,0,Double.MAX_VALUE,0};
         this.randomStatistics = new double[]{0,0,Double.MAX_VALUE,0,0};
+        this.greedyStatistics = new double[]{0,0,Double.MAX_VALUE,0,0};
         this.TSPList = new ArrayList<>();
 
         // Random Number Generator
@@ -22,10 +23,12 @@ public class IDK {
             TSPList.add(new TravelingSalesman(randomSeeds[i]));
             TSPList.get(i).findSolutionByForce();
             TSPList.get(i).generateRandomTour();
+            TSPList.get(i).findGreedySolution();
         }
 
         calculateOptimalStatistics();
         calculateRandomStatistics();
+        calculateGreedyStatistics();
     }
 
 
@@ -82,6 +85,34 @@ public class IDK {
         optimalStatistics[1] = Math.sqrt(var);
     }
 
+    public void calculateGreedyStatistics(){
+        double mean = 0;
+        double var = 0;
+
+        for (TravelingSalesman ts : TSPList){
+            if (ts.getGreedyCost() == ts.getOptimalCost()){
+                greedyStatistics[4]++;
+            }
+            if (ts.getGreedyCost() < greedyStatistics[2]) {
+                greedyStatistics[2] = ts.getGreedyCost();
+            } else if (ts.getGreedyCost() > greedyStatistics[3]){
+                greedyStatistics[3] = ts.getGreedyCost();
+            }
+            mean += ts.getGreedyCost();
+        }
+
+        mean /= numOfTSP;
+
+        for (TravelingSalesman ts : TSPList){
+            var += Math.pow(ts.getGreedyCost() - mean, 2);
+        }
+
+        var /= numOfTSP;
+
+        greedyStatistics[0] = mean;
+        greedyStatistics[1] = Math.sqrt(var);
+    }
+
     public void printStatistics(){
         System.out.println("Optimal Solutions");
         System.out.println("\tMean: " + optimalStatistics[0]);
@@ -95,6 +126,13 @@ public class IDK {
         System.out.println("\tMin Cost: " + randomStatistics[2]);
         System.out.println("\tMax Cost: " + randomStatistics[3]);
         System.out.println("\tNumber of Optimal Solutions found: " + randomStatistics[4]);
+        System.out.println();
+        System.out.println("Greedy Solutions");
+        System.out.println("\tMean: " + greedyStatistics[0]);
+        System.out.println("\tStd Dev: " + greedyStatistics[1]);
+        System.out.println("\tMin Cost: " + greedyStatistics[2]);
+        System.out.println("\tMax Cost: " + greedyStatistics[3]);
+        System.out.println("\tNumber of Optimal Solutions found: " + greedyStatistics[4]);
     }
 
     public static void main(String[] args) {

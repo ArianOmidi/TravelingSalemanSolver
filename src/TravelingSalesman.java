@@ -7,14 +7,14 @@ import java.util.stream.Stream;
 public class TravelingSalesman {
     private final double[][] cities;
     private final double[][] distances;
-    private int[] solution, randomTour;
-    private double optimalCost, randomCost;
+    private int[] optimalTour, randomTour, greedyTour;
+    private double optimalCost, randomCost, greedyCost;
     private boolean solved;
     private int seed;
 
 
     public TravelingSalesman(int seed){
-        this.solution = new int[6];
+        this.optimalTour = new int[7];
         this.cities = new double[7][2];
         this.distances = new double[7][7];
         this.solved = false;
@@ -54,9 +54,7 @@ public class TravelingSalesman {
     }
 
     public int[] getSolution() {
-        int[] tour = new int[7];
-        System.arraycopy(solution, 0, tour, 1, solution.length);
-        return tour;
+        return optimalTour;
     }
 
     public boolean isSolved() {
@@ -75,8 +73,12 @@ public class TravelingSalesman {
         return randomCost;
     }
 
+    public double getGreedyCost() {
+        return greedyCost;
+    }
+
     public void findSolutionByForce(){
-        bruteForceRecursive(6, new int[]{1,2,3,4,5,6});
+        bruteForceRecursive(7, new int[]{0,1,2,3,4,5,6});
         solved = true;
     }
 
@@ -85,7 +87,7 @@ public class TravelingSalesman {
             double costOfPath = findCost(path);
             if (costOfPath < this.optimalCost){
                 this.optimalCost = costOfPath;
-                this.solution = Arrays.copyOf(path, 6);
+                this.optimalTour = Arrays.copyOf(path, 7);
             }
         } else {
             for(int i = 0; i < n-1; i++) {
@@ -101,12 +103,12 @@ public class TravelingSalesman {
     }
 
     private double findCost(int[] path){
-        double sum = distances[0][path[0]];
+        double sum = 0;
 
         for (int i=0; i < path.length - 1; i++){
             sum += distances[path[i]][path[(i+1)]];
         }
-        sum +=  distances[path[path.length - 1]][0];
+        sum +=  distances[path[path.length - 1]][path[0]];
 
         return sum;
     }
@@ -115,17 +117,60 @@ public class TravelingSalesman {
         this.randomTour = new int[7];
         ArrayList<Integer> tour = new ArrayList<>();
 
-        for (int i = 1; i < 7; i++) {
+        for (int i = 0; i < 7; i++) {
             tour.add(i);
         }
 
         java.util.Collections.shuffle(tour, new Random(seed));
-        tour.add(0, 0);
 
         for(int i = 0; i < tour.size(); i++)
             randomTour[i] = tour.get(i);
 
         randomCost = findCost(randomTour);
+    }
+
+    public void findGreedySolution(){
+        if (randomTour == null){
+            generateRandomTour();
+        }
+
+        greedyTour = findGreedySolutionRec(randomTour, randomCost);
+        greedyCost = findCost(greedyTour);
+    }
+
+    private int[] findGreedySolutionRec(int[] tour, double minCost){
+        int[][] neighbors = getNeighbors(tour);
+        double minNeighborCost = Double.MAX_VALUE;
+        int index = 0;
+
+        for (int i = 0; i < neighbors.length; i++) {
+            double cost = findCost(neighbors[i]);
+            if (cost < minNeighborCost){
+                minNeighborCost = cost;
+                index = i;
+            }
+        }
+
+        if (minNeighborCost < minCost){
+            return findGreedySolutionRec(neighbors[index], minNeighborCost);
+        }
+
+        return tour;
+    }
+
+    private int[][] getNeighbors(int[] tour){
+        int[][] neighbors = new int[21][tour.length];
+        int index = 0;
+
+        for (int i = 0; i < 6; i++) {
+            for (int j = i + 1; j < 7; j++) {
+                int[] neighbor = Arrays.copyOf(tour,tour.length);
+                Utils.swap(neighbor, i, j);
+                neighbors[index++] = neighbor;
+            }
+        }
+
+        return neighbors;
     }
 
     public static void main(String[] args) {
