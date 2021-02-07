@@ -1,3 +1,6 @@
+// 2-Opt code structure taken from:
+//     Wikipedia contributors. (2020, September 2). 2-opt. Wikipedia. https://en.m.wikipedia.org/wiki/2-opt
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
