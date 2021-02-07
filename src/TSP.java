@@ -131,7 +131,7 @@ public class TSP {
     }
 
     private int[] findGreedySolutionRec(int[] tour, double minCost){
-        int[][] neighbors = getNeighbors(tour);
+        int[][] neighbors = get2OptNeighbors(tour);
         double minNeighborCost = Double.MAX_VALUE;
         int index = 0;
 
@@ -165,19 +165,31 @@ public class TSP {
         return sum;
     }
 
-    private int[][] getNeighbors(int[] tour){
+    private int[][] get2OptNeighbors(int[] tour){
         int[][] neighbors = new int[Utils.nChoose2(numOfCities)][tour.length];
         int index = 0;
 
         for (int i = 0; i < numOfCities - 1; i++) {
-            for (int j = i + 1; j < numOfCities; j++) {
-                int[] neighbor = Arrays.copyOf(tour,tour.length);
-                Utils.swap(neighbor, i, j);
-                neighbors[index++] = neighbor;
+            for (int k = i + 1; k < numOfCities; k++) {
+                neighbors[index++] = get2Opt(tour, i, k);
             }
         }
 
         return neighbors;
+    }
+
+    private int[] get2Opt(int[] tour, int i, int k){
+        int[] neighbor = new int[tour.length];
+
+        System.arraycopy(tour, 0, neighbor, 0, i);
+
+        for (int j = i; j <= k; j++) {
+            neighbor[j] = tour[k + i - j];
+        }
+
+        System.arraycopy(tour, k + 1, neighbor, k + 1, tour.length - k - 1);
+
+        return neighbor;
     }
 
 }
